@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claim Genie Integrated with Claim Lens - Workflow</title>
+  <style>
+    :root {
+      --ink: #12213a;
+      --muted: #66758d;
+      --paper: #ffffff;
+      --soft: #f5f8fc;
+      --line: #dbe6f4;
+      --brand: #1557ff;
+      --brand-dark: #0838b8;
+      --cyan: #16c7d2;
+      --mint: #25c982;
+      --amber: #f6a609;
+      --rose: #ef476f;
+      --purple: #7657ff;
+      --shadow: 0 18px 48px rgba(15, 23, 42, 0.14);
+      --radius: 26px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(21, 87, 255, 0.18), transparent 30%),
+        radial-gradient(circle at 92% 10%, rgba(22, 199, 210, 0.2), transparent 28%),
+        linear-gradient(135deg, #eef5ff, #fbfdff 46%, #f6f1ff);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+
+    .hero-card,
+    .summary-card,
+    .workflow-card,
+    .case-card,
+    .lane-card,
+    .decision-table,
+    .legend-card {
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .hero-card {
+      padding: 34px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      right: -100px;
+      top: -120px;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(21, 87, 255, 0.18), rgba(22, 199, 210, 0.1));
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--brand-dark);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: #e9f1ff;
+    }
+
+    h1 {
+      position: relative;
+      z-index: 1;
+      max-width: 920px;
+      margin: 18px 0 14px;
+      font-size: clamp(36px, 5vw, 68px);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      max-width: 920px;
+      color: #40516d;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .summary-card {
+      padding: 22px;
+    }
+
+    .summary-card h2,
+    .workflow-card h2,
+    .section-title h2,
+    .legend-card h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+
+    .metric {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .metric:last-child {
+      border-bottom: 0;
+    }
+
+    .metric-number {
+      display: grid;
+      place-items: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 18px;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: end;
+      margin: 26px 0 14px;
+    }
+
+    .section-title p {
+      max-width: 760px;
+      margin: 6px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+    }
+
+    .tab {
+      border: 1px solid #c8d7eb;
+      border-radius: 999px;
+      padding: 10px 13px;
+      color: #50627c;
+      font-size: 13px;
+      font-weight: 900;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      color: #fff;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--brand), var(--purple));
+      box-shadow: 0 12px 24px rgba(21, 87, 255, 0.2);
+    }
+
+    .workflow-card {
+      padding: 24px;
+      overflow: auto;
+    }
+
+    .flow {
+      min-width: 1080px;
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .lane-label {
+      display: grid;
+      place-items: center;
+      min-height: 84px;
+      border-radius: 22px;
+      color: #fff;
+      text-align: center;
+      font-weight: 1000;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #0f2f78, var(--brand));
+      box-shadow: 0 16px 30px rgba(21, 87, 255, 0.18);
+    }
+
+    .lane-steps {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(150px, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .node {
+      position: relative;
+      min-height: 94px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+    }
+
+    .node::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -14px;
+      width: 14px;
+      height: 2px;
+      background: #b8c8dc;
+    }
+
+    .node:last-child::after {
+      display: none;
+    }
+
+    .node strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .node span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    .node.start {
+      border-color: rgba(21, 87, 255, 0.35);
+      background: #edf4ff;
+    }
+
+    .node.decision {
+      border-color: rgba(246, 166, 9, 0.42);
+      background: #fff8e7;
+    }
+
+    .node.ai {
+      border-color: rgba(118, 87, 255, 0.36);
+      background: #f4f1ff;
+    }
+
+    .node.success {
+      border-color: rgba(37, 201, 130, 0.34);
+      background: #eafbf3;
+    }
+
+    .node.stop {
+      border-color: rgba(239, 71, 111, 0.24);
+      background: #fff0f4;
+    }
+
+    .badge {
+      display: inline-flex;
+      margin-bottom: 9px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: var(--brand-dark);
+      font-size: 11px;
+      font-weight: 1000;
+      background: #dfeaff;
+    }
+
+    .cases {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .case-card {
+      padding: 18px;
+    }
+
+    .case-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .case-id {
+      display: inline-grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 16px;
+      color: #fff;
+      font-weight: 1000;
+      background: linear-gradient(135deg, var(--brand), var(--cyan));
+    }
+
+    .case-card h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .case-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #4d5d75;
+      font-size: 13px;
+      line-height: 1.58;
+    }
+
+    .case-list li {
+      margin: 7px 0;
+    }
+
+    .lanes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .lane-card {
+      padding: 20px;
+    }
+
+    .lane-card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+    }
+
+    .lane-card p,
+    .lane-card li {
+      color: #4d5d75;
+      font-size: 13px;
+      line-height: 1.58;
+    }
+
+    .decision-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      overflow: hidden;
+    }
+
+    .decision-table th,
+    .decision-table td {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .decision-table th {
+      color: var(--brand-dark);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: #edf4ff;
+    }
+
+    .decision-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .legend-card {
+      padding: 20px;
+      margin-top: 16px;
+    }
+
+    .legend-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .legend-item {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      color: #4d5d75;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .swatch {
+      width: 22px;
+      height: 22px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .swatch.start {
+      background: #edf4ff;
+    }
+
+    .swatch.decision {
+      background: #fff8e7;
+    }
+
+    .swatch.ai {
+      background: #f4f1ff;
+    }
+
+    .swatch.success {
+      background: #eafbf3;
+    }
+
+    .swatch.stop {
+      background: #fff0f4;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 1180px) {
+      .hero,
+      .cases,
+      .lanes {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        padding: 16px;
+      }
+
+      .hero-card,
+      .summary-card,
+      .workflow-card,
+      .case-card,
+      .lane-card,
+      .legend-card {
+        border-radius: 22px;
+      }
+
+      .section-title {
+        display: block;
+      }
+
+      .legend-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div class="hero-card">
+        <span class="eyebrow">Workflow design</span>
+        <h1>Claim Genie integrated with Claim Lens</h1>
+        <p class="hero-copy">
+          This workflow translates the reimbursement hospitalization claims-intimation journey into a process map for both
+          the customer mobile app and customer portal. It covers customer actions, UI decisions, claims-system searches,
+          Claim Lens AI document checks, bank/contact validation, and final claim-reference generation.
+        </p>
+      </div>
+      <aside class="summary-card">
+        <h2>Workflow coverage</h2>
+        <div class="metric">
+          <div class="metric-number">2</div>
+          <div><strong>Customer channels</strong><span>Mobile app and customer portal start from the same post-login journey.</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">4</div>
+          <div><strong>Reimbursement cases</strong><span>During only, during + before, all three, and before + after.</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">3</div>
+          <div><strong>Document decisions</strong><span>Upload now, upload later, or already uploaded for missing mandatory documents.</span></div>
+        </div>
+        <div class="metric">
+          <div class="metric-number">1</div>
+          <div><strong>AI-assisted layer</strong><span>Claim Lens validates and extracts document details when uploads are provided.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section-title">
+      <div>
+        <h2>End-to-end workflow</h2>
+        <p>Use the tabs to view the full combined workflow or focus on one operational lane.</p>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Workflow views">
+        <button class="tab active" onclick="showView('all', this)">Full workflow</button>
+        <button class="tab" onclick="showView('customer', this)">Customer</button>
+        <button class="tab" onclick="showView('system', this)">Claims system</button>
+        <button class="tab" onclick="showView('ai', this)">Claim Lens AI</button>
+        <button class="tab" onclick="showView('payment', this)">Bank/contact</button>
+      </div>
+    </section>
+
+    <section class="workflow-card">
+      <div class="flow">
+        <div class="flow-row lane customer">
+          <div class="lane-label">Customer<br>Mobile / Portal</div>
+          <div class="lane-steps">
+            <div class="node start"><span class="badge">Entry</span><strong>Login complete</strong><span>Customer enters from mobile app or customer portal.</span></div>
+            <div class="node"><strong>Select member</strong><span>Choose insured member from the policy.</span></div>
+            <div class="node decision"><strong>Select claim type</strong><span>Choose Reimbursement or Cashless.</span></div>
+            <div class="node decision"><strong>Choose intent</strong><span>For Reimbursement: File a new Claim or Track your existing Claim.</span></div>
+            <div class="node"><strong>Select benefits</strong><span>View only applicable policy benefits and multi-select hospitalization pictorial cards.</span></div>
+            <div class="node"><strong>Enter details</strong><span>Provide date of admission and requested claim amount.</span></div>
+          </div>
+        </div>
+
+        <div class="flow-row lane system">
+          <div class="lane-label">Claim Genie UI<br>and Claims System</div>
+          <div class="lane-steps">
+            <div class="node"><strong>Route cashless</strong><span>If Cashless is selected, continue existing workflow with no journey change.</span></div>
+            <div class="node"><strong>Show tracker</strong><span>If Track is selected, display claim number, benefit, DOA, status, and pending actions.</span></div>
+            <div class="node decision"><strong>Identify case</strong><span>Classify selection as Case 1, 2, 3, or 4.</span></div>
+            <div class="node decision"><strong>Search existing claim</strong><span>Same benefit and same DOA for cases with During; +/- 5 days for Before + After only.</span></div>
+            <div class="node"><strong>Display guidance</strong><span>If main claim exists, ask customer to file pre/post claim using that claim number.</span></div>
+            <div class="node"><strong>Show required docs</strong><span>Mandatory document checklist changes based on selected benefits.</span></div>
+          </div>
+        </div>
+
+        <div class="flow-row lane customer">
+          <div class="lane-label">Customer<br>Documents</div>
+          <div class="lane-steps">
+            <div class="node decision"><strong>Document choice</strong><span>Proceed without document or Upload &amp; Proceed.</span></div>
+            <div class="node stop"><strong>Pre-intimation path</strong><span>Proceed without document creates pre-intimation. Claim Lens AI is not triggered.</span></div>
+            <div class="node"><strong>Upload multiple docs</strong><span>Upload discharge summary, bills, receipts, prescriptions, reports, and other required documents.</span></div>
+            <div class="node decision"><strong>Mandatory missing?</strong><span>If any mandatory document is missing, customer chooses Upload now, Upload later, or Already Uploaded.</span></div>
+            <div class="node stop"><strong>Upload later outcome</strong><span>Customer is told claim will not be processed until mandatory documents are submitted.</span></div>
+            <div class="node"><strong>Already uploaded outcome</strong><span>Continue without exposing that AI may have missed document identification.</span></div>
+          </div>
+        </div>
+
+        <div class="flow-row lane ai">
+          <div class="lane-label">Claim Lens AI</div>
+          <div class="lane-steps">
+            <div class="node ai"><strong>Validate documents</strong><span>Check mandatory documents by benefit and document category.</span></div>
+            <div class="node ai"><strong>Extract details</strong><span>Read DOA, DOD, amount, member details, hospital data, and bill information.</span></div>
+            <div class="node ai decision"><strong>Surgical case?</strong><span>If discharge summary indicates surgery, request surgical report.</span></div>
+            <div class="node ai"><strong>Auto-fill form</strong><span>Populate digital claim form for customer quality check.</span></div>
+            <div class="node ai decision"><strong>Extraction failed?</strong><span>If confidence is insufficient, open form for manual entry.</span></div>
+            <div class="node ai"><strong>Freeze eligible fields</strong><span>Freeze DOA, DOD, and amount when customer entry matches extracted values and rules.</span></div>
+          </div>
+        </div>
+
+        <div class="flow-row lane payment">
+          <div class="lane-label">Bank, Contact<br>and Submission</div>
+          <div class="lane-steps">
+            <div class="node"><strong>Bank details</strong><span>Use existing bank details or collect new account details.</span></div>
+            <div class="node decision"><strong>Background validation</strong><span>Run penny-drop API silently. Do not show penny-drop option to customer.</span></div>
+            <div class="node decision"><strong>Name match?</strong><span>If account holder name does not match proposer, ask to re-enter or upload cancelled cheque.</span></div>
+            <div class="node"><strong>Contact details</strong><span>Show masked email and mobile, with option to use different contact details.</span></div>
+            <div class="node"><strong>Consent</strong><span>Customer ticks consent after digital form QC.</span></div>
+            <div class="node success"><strong>Generate reference</strong><span>Final submission creates claim reference number.</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="legend-card">
+      <h2>Node legend</h2>
+      <div class="legend-grid">
+        <div class="legend-item"><span class="swatch start"></span> Entry / start</div>
+        <div class="legend-item"><span class="swatch decision"></span> Decision gate</div>
+        <div class="legend-item"><span class="swatch ai"></span> Claim Lens AI</div>
+        <div class="legend-item"><span class="swatch stop"></span> Hold / alternate path</div>
+        <div class="legend-item"><span class="swatch success"></span> Completion</div>
+      </div>
+    </section>
+
+    <section class="section-title">
+      <div>
+        <h2>Case-specific reimbursement workflow</h2>
+        <p>Each case begins after Reimbursement &gt; File a new Claim &gt; applicable benefit selection.</p>
+      </div>
+    </section>
+
+    <section class="cases">
+      <article class="case-card">
+        <div class="case-head">
+          <div>
+            <h3>During hospitalization only</h3>
+            <span class="badge">Case 1</span>
+          </div>
+          <div class="case-id">1</div>
+        </div>
+        <ol class="case-list">
+          <li>Ask Date of Admission.</li>
+          <li>Search claims system for same benefit and same DOA.</li>
+          <li>If main claim exists, guide customer to create before/after claim using existing claim number.</li>
+          <li>Ask requested claim amount.</li>
+          <li>Show mandatory hospitalization documents: discharge summary and bills.</li>
+          <li>Run Claim Lens only if documents are uploaded.</li>
+          <li>Generate digital QC form and claim reference after consent.</li>
+        </ol>
+      </article>
+
+      <article class="case-card">
+        <div class="case-head">
+          <div>
+            <h3>During + before hospitalization</h3>
+            <span class="badge">Case 2</span>
+          </div>
+          <div class="case-id">2</div>
+        </div>
+        <ol class="case-list">
+          <li>Ask Date of Admission.</li>
+          <li>Search claims system for an existing main claim with same benefit and DOA.</li>
+          <li>Allow combined main and pre-hospitalization expense intimation.</li>
+          <li>Show mandatory documents for hospitalization and pre-hospitalization.</li>
+          <li>Handle missing documents with Upload now, Upload later, or Already Uploaded.</li>
+          <li>Run extraction and surgical-report check when documents are present.</li>
+          <li>Proceed to digital form QC and reference generation.</li>
+        </ol>
+      </article>
+
+      <article class="case-card">
+        <div class="case-head">
+          <div>
+            <h3>During + before + after hospitalization</h3>
+            <span class="badge">Case 3</span>
+          </div>
+          <div class="case-id">3</div>
+        </div>
+        <ol class="case-list">
+          <li>Ask Date of Admission for the complete treatment episode.</li>
+          <li>Search same benefit and same DOA for an existing main claim.</li>
+          <li>Capture requested amount across during, before, and after expenses.</li>
+          <li>Show combined mandatory document checklist for all selected benefits.</li>
+          <li>Apply the same document, AI, surgical-report, and manual fallback rules.</li>
+          <li>Auto-fill digital form and freeze matching extracted fields.</li>
+          <li>Submit with consent and generate claim reference.</li>
+        </ol>
+      </article>
+
+      <article class="case-card">
+        <div class="case-head">
+          <div>
+            <h3>Before + after hospitalization</h3>
+            <span class="badge">Case 4</span>
+          </div>
+          <div class="case-id">4</div>
+        </div>
+        <ol class="case-list">
+          <li>Ask Date of Admission.</li>
+          <li>Search claims system for existing main claim within +/- 5 days of DOA.</li>
+          <li>Customer chooses the existing claim number to attach pre/post expenses.</li>
+          <li>Ask requested claim amount.</li>
+          <li>Show mandatory bills and benefit-specific supporting documents.</li>
+          <li>Run Claim Lens only when documents are uploaded.</li>
+          <li>Finalize digital QC, consent, and claim reference.</li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="section-title">
+      <div>
+        <h2>Decision rules and system behavior</h2>
+        <p>These rules define how the front-end, claims system, Claim Lens, and bank validation behave at major decision points.</p>
+      </div>
+    </section>
+
+    <table class="decision-table" aria-label="Decision rules">
+      <thead>
+        <tr>
+          <th>Decision point</th>
+          <th>Condition</th>
+          <th>System / UI action</th>
+          <th>Customer-facing message</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Claim type</td>
+          <td>Cashless selected</td>
+          <td>Route to existing cashless flow.</td>
+          <td>Existing cashless workflow will continue.</td>
+        </tr>
+        <tr>
+          <td>Reimbursement intent</td>
+          <td>Track your existing Claim selected</td>
+          <td>Show claim number, status, benefit, DOA, and next action.</td>
+          <td>Track status and pending documents.</td>
+        </tr>
+        <tr>
+          <td>Applicable benefits</td>
+          <td>File a new Claim selected</td>
+          <td>Show only policy-available benefits. Allow multi-select.</td>
+          <td>You are viewing only the applicable benefits available in this policy.</td>
+        </tr>
+        <tr>
+          <td>Existing claim search</td>
+          <td>During hospitalization is part of selection</td>
+          <td>Search same benefit and same date of admission.</td>
+          <td>Main claim already exists; file before/after claim using claim number.</td>
+        </tr>
+        <tr>
+          <td>Existing claim search</td>
+          <td>Before + after selected without during</td>
+          <td>Search main claim within +/- 5 days of admission date.</td>
+          <td>Select the existing claim number for before/after hospitalization filing.</td>
+        </tr>
+        <tr>
+          <td>Document path</td>
+          <td>Proceed without document</td>
+          <td>Create pre-intimation case. Do not trigger Claim Lens AI.</td>
+          <td>Documents can be uploaded later before processing starts.</td>
+        </tr>
+        <tr>
+          <td>Mandatory documents</td>
+          <td>Required document not detected</td>
+          <td>Offer Upload now, Upload later, or Already Uploaded.</td>
+          <td>Some mandatory documents are missing. Upload now, upload later, or confirm already uploaded.</td>
+        </tr>
+        <tr>
+          <td>Surgical report</td>
+          <td>Discharge summary indicates surgical case</td>
+          <td>Request surgical report with the same three document choices.</td>
+          <td>A surgical report is required to process this claim.</td>
+        </tr>
+        <tr>
+          <td>AI extraction</td>
+          <td>Claim Lens extraction confidence is insufficient</td>
+          <td>Open digital claim form for manual completion.</td>
+          <td>Please complete the claim form manually.</td>
+        </tr>
+        <tr>
+          <td>Bank validation</td>
+          <td>New bank details entered</td>
+          <td>Run penny-drop API silently in the background.</td>
+          <td>No penny-drop option is shown to customer.</td>
+        </tr>
+        <tr>
+          <td>Bank validation</td>
+          <td>Account holder name does not match policy proposer</td>
+          <td>Ask customer to re-enter bank details or upload cancelled cheque.</td>
+          <td>Entered bank details are not correct. Please re-enter or upload cancelled cheque.</td>
+        </tr>
+        <tr>
+          <td>Submission</td>
+          <td>Digital QC complete and consent ticked</td>
+          <td>Submit intimation and generate claim reference number.</td>
+          <td>Your claim reference number has been generated.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <section class="section-title">
+      <div>
+        <h2>Channel-specific workflow presentation</h2>
+        <p>The mobile and portal surfaces share the same business rules but present them differently for customer convenience.</p>
+      </div>
+    </section>
+
+    <section class="lanes">
+      <article class="lane-card">
+        <h3>Mobile app workflow</h3>
+        <ul>
+          <li>Use a guided stepper with one primary action per screen.</li>
+          <li>Show member card immediately after login for quick confirmation.</li>
+          <li>Use large pictorial cards for hospitalization, before hospitalization, and after hospitalization.</li>
+          <li>Keep document upload mobile-first with camera/gallery/file picker support.</li>
+          <li>Show Claim Lens waiting screen with short reassurance content while extraction runs.</li>
+          <li>Use bottom sticky actions for Proceed without document, Upload &amp; Proceed, and Final submit.</li>
+        </ul>
+      </article>
+      <article class="lane-card">
+        <h3>Customer portal workflow</h3>
+        <ul>
+          <li>Use a dashboard layout with side navigation and a broader content area.</li>
+          <li>Show the member strip in the portal header and keep context visible.</li>
+          <li>Use side-by-side cards for claim type, intent, benefits, and digital QC fields.</li>
+          <li>Provide a larger upload drop zone for multiple documents.</li>
+          <li>Display claim-system match guidance and document checklist together.</li>
+          <li>Show digital form QC, bank validation result, contact details, and consent in one review page.</li>
+        </ul>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    function showView(view, button) {
+      document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+      button.classList.add("active");
+
+      document.querySelectorAll(".lane").forEach(lane => {
+        if (view === "all" || lane.classList.contains(view)) {
+          lane.classList.remove("hidden");
+        } else {
+          lane.classList.add("hidden");
+        }
+      });
+    }
+  </script>
+</body>
+</html>
