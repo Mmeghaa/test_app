@@ -1,0 +1,1873 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claim Genie Integrated with Claim Lens - Claims Intimation Prototype</title>
+  <style>
+    :root {
+      --ink: #13233a;
+      --muted: #64748b;
+      --line: #dbe5f2;
+      --soft: #f5f8fc;
+      --brand: #1457ff;
+      --brand-dark: #0837b7;
+      --aqua: #13c8d2;
+      --mint: #2fd37f;
+      --amber: #ffb020;
+      --rose: #ff5a7a;
+      --purple: #7c3aed;
+      --paper: #ffffff;
+      --shadow: 0 18px 45px rgba(15, 23, 42, 0.16);
+      --radius: 24px;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: var(--font);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(20, 87, 255, 0.2), transparent 34%),
+        radial-gradient(circle at 92% 12%, rgba(19, 200, 210, 0.22), transparent 32%),
+        linear-gradient(135deg, #eff6ff 0%, #f8fbff 46%, #f7f2ff 100%);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .shell {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 26px;
+    }
+
+    .hero-card,
+    .workflow-map,
+    .surface-card {
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 32px;
+      background: rgba(255, 255, 255, 0.82);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero-card {
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      right: -80px;
+      top: -100px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(20, 87, 255, 0.18), rgba(19, 200, 210, 0.1));
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: var(--brand-dark);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: #eaf1ff;
+    }
+
+    h1 {
+      position: relative;
+      z-index: 1;
+      max-width: 900px;
+      margin: 18px 0 14px;
+      font-size: clamp(34px, 5vw, 66px);
+      line-height: 0.94;
+      letter-spacing: -0.06em;
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 1;
+      max-width: 820px;
+      color: #40516d;
+      font-size: 17px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .pill-button,
+    .primary-button,
+    .ghost-button,
+    .text-button {
+      border: 0;
+      border-radius: 999px;
+      font-weight: 800;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .primary-button {
+      padding: 13px 18px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), var(--purple));
+      box-shadow: 0 14px 30px rgba(20, 87, 255, 0.24);
+    }
+
+    .ghost-button {
+      padding: 12px 17px;
+      color: var(--brand-dark);
+      background: #edf4ff;
+      border: 1px solid #cdddf8;
+    }
+
+    .text-button {
+      padding: 8px 0;
+      color: var(--brand-dark);
+      background: transparent;
+    }
+
+    .primary-button:hover,
+    .ghost-button:hover,
+    .pill-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 26px rgba(15, 23, 42, 0.14);
+    }
+
+    .workflow-map {
+      padding: 22px;
+    }
+
+    .workflow-map h2,
+    .surface-card h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .flow-row {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .flow-row:last-child {
+      border-bottom: 0;
+    }
+
+    .flow-dot {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      color: #fff;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--brand), var(--aqua));
+    }
+
+    .flow-row strong {
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .flow-row span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .surfaces {
+      display: grid;
+      grid-template-columns: 420px minmax(680px, 1fr);
+      gap: 26px;
+      align-items: start;
+    }
+
+    .surface-card {
+      padding: 20px;
+    }
+
+    .surface-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .surface-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      color: #0f766e;
+      font-size: 12px;
+      font-weight: 900;
+      background: #dffcf7;
+    }
+
+    .phone-frame {
+      width: min(100%, 380px);
+      margin: 0 auto;
+      padding: 14px;
+      border-radius: 42px;
+      background: #0f172a;
+      box-shadow: 0 28px 60px rgba(15, 23, 42, 0.32);
+    }
+
+    .phone-screen {
+      overflow: hidden;
+      min-height: 780px;
+      border-radius: 31px;
+      background: #f7f9fd;
+    }
+
+    .phone-notch {
+      width: 110px;
+      height: 25px;
+      margin: 0 auto -16px;
+      border-radius: 0 0 18px 18px;
+      background: #0f172a;
+      position: relative;
+      z-index: 5;
+    }
+
+    .portal-frame {
+      overflow: hidden;
+      border: 1px solid #dbe5f2;
+      border-radius: 28px;
+      background: #f7f9fd;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .portal-browser {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 18px;
+      background: #eef4fc;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .browser-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #ff5f57;
+    }
+
+    .browser-dot:nth-child(2) {
+      background: #ffbd2e;
+    }
+
+    .browser-dot:nth-child(3) {
+      background: #28c840;
+    }
+
+    .browser-url {
+      flex: 1;
+      margin-left: 12px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: #718096;
+      font-size: 12px;
+      background: #fff;
+    }
+
+    .app {
+      min-height: 760px;
+      background:
+        radial-gradient(circle at 88% 0%, rgba(20, 87, 255, 0.14), transparent 28%),
+        linear-gradient(180deg, #ffffff, #f6f9ff 42%, #edf4ff);
+    }
+
+    .portal-frame .app {
+      min-height: 760px;
+    }
+
+    .mobile-app .app-top {
+      padding: 30px 18px 16px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.28), transparent 28%),
+        linear-gradient(135deg, #063cc0, #1457ff 58%, #13c8d2);
+    }
+
+    .portal-app .app-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: center;
+      padding: 24px 30px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 91% 10%, rgba(255, 255, 255, 0.22), transparent 28%),
+        linear-gradient(135deg, #082f94, #1457ff 54%, #13c8d2);
+    }
+
+    .app-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .genie-mark {
+      display: grid;
+      place-items: center;
+      width: 45px;
+      height: 45px;
+      border-radius: 17px;
+      color: #063cc0;
+      font-weight: 1000;
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+    }
+
+    .app-brand strong {
+      display: block;
+      font-size: 19px;
+      letter-spacing: -0.03em;
+    }
+
+    .app-brand span {
+      display: block;
+      opacity: 0.82;
+      font-size: 12px;
+    }
+
+    .member-strip {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 18px;
+      padding: 11px 12px;
+      border-radius: 18px;
+      color: #0f2e66;
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .portal-app .member-strip {
+      min-width: 320px;
+      margin-top: 0;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      border-radius: 14px;
+      color: #fff;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--purple), var(--brand));
+    }
+
+    .member-strip small {
+      display: block;
+      color: #66748a;
+      font-size: 11px;
+    }
+
+    .app-body {
+      padding: 18px;
+    }
+
+    .portal-app .app-body {
+      display: grid;
+      grid-template-columns: 235px 1fr;
+      gap: 22px;
+      padding: 26px;
+    }
+
+    .side-nav {
+      display: none;
+    }
+
+    .portal-app .side-nav {
+      display: block;
+      align-self: start;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.86);
+    }
+
+    .nav-item {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 12px 10px;
+      border-radius: 16px;
+      color: #52647d;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .nav-item.active {
+      color: var(--brand-dark);
+      background: #eaf1ff;
+    }
+
+    .stage {
+      animation: stage-in 0.26s ease;
+    }
+
+    @keyframes stage-in {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .progress-card,
+    .panel,
+    .choice-card,
+    .benefit-card,
+    .doc-drop,
+    .form-card,
+    .success-card {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    .progress-card {
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+    }
+
+    .step {
+      height: 6px;
+      border-radius: 999px;
+      background: #dbe7f5;
+    }
+
+    .step.done {
+      background: linear-gradient(90deg, var(--brand), var(--aqua));
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+      color: #61728b;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .portal-app .panel {
+      padding: 24px;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: -0.04em;
+    }
+
+    .portal-app .panel h3 {
+      font-size: 30px;
+    }
+
+    .panel > p,
+    .muted {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .portal-app .grid-2 {
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .mobile-app .grid-3 {
+      grid-template-columns: 1fr;
+    }
+
+    .choice-card,
+    .benefit-card {
+      position: relative;
+      min-height: 112px;
+      padding: 16px;
+      text-align: left;
+      border: 1px solid var(--line);
+      color: var(--ink);
+      overflow: hidden;
+    }
+
+    .choice-card::after,
+    .benefit-card::after {
+      content: "";
+      position: absolute;
+      right: -32px;
+      bottom: -34px;
+      width: 104px;
+      height: 104px;
+      border-radius: 36px;
+      background: rgba(20, 87, 255, 0.08);
+      transform: rotate(16deg);
+    }
+
+    .choice-card.active,
+    .benefit-card.active {
+      border-color: rgba(20, 87, 255, 0.58);
+      box-shadow: 0 17px 34px rgba(20, 87, 255, 0.14);
+    }
+
+    .choice-card .icon,
+    .benefit-card .icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      margin-bottom: 13px;
+      border-radius: 18px;
+      font-size: 26px;
+      background: #edf4ff;
+    }
+
+    .choice-card strong,
+    .benefit-card strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 16px;
+    }
+
+    .choice-card span,
+    .benefit-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .benefit-card .check {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      display: grid;
+      place-items: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 13px;
+      background: #cbd5e1;
+      z-index: 2;
+    }
+
+    .benefit-card.active .check {
+      background: var(--mint);
+    }
+
+    .notice,
+    .alert,
+    .inline-success,
+    .lens-card {
+      padding: 12px 13px;
+      border-radius: 18px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .notice {
+      margin: 15px 0;
+      color: #0f4f68;
+      background: #e6f8fb;
+      border: 1px solid #b8edf3;
+    }
+
+    .alert {
+      margin: 15px 0;
+      color: #7a4200;
+      background: #fff7df;
+      border: 1px solid #ffe2a2;
+    }
+
+    .inline-success {
+      color: #0b6b45;
+      background: #e8fbf1;
+      border: 1px solid #bbefd5;
+    }
+
+    .lens-card {
+      margin: 14px 0;
+      color: #1e1b4b;
+      background: #f2efff;
+      border: 1px solid #ded5ff;
+    }
+
+    .field-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .mobile-app .field-row {
+      grid-template-columns: 1fr;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      color: #3b4b63;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.01em;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #cbd7e6;
+      border-radius: 16px;
+      padding: 13px 14px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(20, 87, 255, 0.12);
+    }
+
+    input[readonly] {
+      color: #52647d;
+      background: #f1f5f9;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 18px;
+    }
+
+    .mobile-app .actions .primary-button,
+    .mobile-app .actions .ghost-button {
+      flex: 1;
+      min-width: 130px;
+    }
+
+    .doc-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .mobile-app .doc-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .doc-chip {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      padding: 11px 12px;
+      border: 1px dashed #a8b9ce;
+      border-radius: 16px;
+      color: #43546d;
+      background: #fbfdff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .doc-chip.required::before {
+      content: "!";
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--rose);
+    }
+
+    .doc-drop {
+      display: grid;
+      place-items: center;
+      min-height: 150px;
+      margin-top: 14px;
+      padding: 18px;
+      text-align: center;
+      border-style: dashed;
+      background:
+        radial-gradient(circle at center, rgba(19, 200, 210, 0.08), transparent 58%),
+        #fff;
+    }
+
+    .doc-drop input {
+      margin-top: 12px;
+      padding: 11px;
+    }
+
+    .uploaded-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .upload-pill {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      color: #35506e;
+      background: #eef6ff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .processing {
+      text-align: center;
+      padding: 24px 12px;
+    }
+
+    .lens-orb {
+      width: 124px;
+      height: 124px;
+      margin: 8px auto 18px;
+      border-radius: 38px;
+      background:
+        radial-gradient(circle at 35% 28%, rgba(255, 255, 255, 0.95), transparent 18%),
+        conic-gradient(from 0deg, var(--brand), var(--aqua), var(--purple), var(--brand));
+      animation: spin 1.8s linear infinite;
+      box-shadow: 0 18px 38px rgba(20, 87, 255, 0.26);
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .processing-steps {
+      display: grid;
+      gap: 9px;
+      max-width: 480px;
+      margin: 18px auto 0;
+      text-align: left;
+    }
+
+    .processing-steps div {
+      display: flex;
+      gap: 9px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      color: #485b75;
+      background: #f2f7ff;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .processing-steps div::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 0 5px rgba(47, 211, 127, 0.14);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .mobile-app .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-card {
+      padding: 14px;
+      position: relative;
+    }
+
+    .form-card .edit {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 12px;
+      background: #edf4ff;
+    }
+
+    .form-card small {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .form-card strong {
+      display: block;
+      padding-right: 32px;
+    }
+
+    .lock-note {
+      display: inline-flex;
+      margin-top: 10px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      color: #475569;
+      background: #f1f5f9;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .consent-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 16px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fbfdff;
+    }
+
+    .consent-row input {
+      width: auto;
+      margin-top: 4px;
+    }
+
+    .success-card {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .success-icon {
+      display: grid;
+      place-items: center;
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 16px;
+      border-radius: 30px;
+      color: #fff;
+      font-size: 42px;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--mint), #0ea5e9);
+      box-shadow: 0 16px 32px rgba(47, 211, 127, 0.26);
+    }
+
+    .ref-box {
+      display: inline-flex;
+      margin: 12px 0;
+      padding: 12px 16px;
+      border-radius: 18px;
+      color: var(--brand-dark);
+      font-size: 20px;
+      font-weight: 1000;
+      letter-spacing: 0.04em;
+      background: #edf4ff;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(15, 23, 42, 0.44);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-backdrop.show {
+      display: grid;
+    }
+
+    .modal {
+      width: min(520px, 100%);
+      padding: 22px;
+      border-radius: 28px;
+      background: #fff;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.35);
+    }
+
+    .modal h4 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      letter-spacing: -0.03em;
+    }
+
+    .modal p {
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .modal-actions {
+      display: grid;
+      gap: 9px;
+      margin-top: 18px;
+    }
+
+    .modal-actions button {
+      justify-content: center;
+    }
+
+    .case-note {
+      margin-top: 12px;
+      padding: 12px;
+      border-left: 4px solid var(--brand);
+      border-radius: 14px;
+      background: #f3f7ff;
+      color: #3f5068;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .track-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .track-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      height: 30px;
+      padding: 0 10px;
+      border-radius: 999px;
+      color: #0b6b45;
+      background: #e8fbf1;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .utility-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 14px 0;
+    }
+
+    .scenario-button {
+      border: 1px solid #cbd7e6;
+      border-radius: 999px;
+      padding: 8px 10px;
+      color: #52647d;
+      background: #fff;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .scenario-button:hover {
+      color: var(--brand-dark);
+      border-color: var(--brand);
+    }
+
+    @media (max-width: 1180px) {
+      .hero,
+      .surfaces {
+        grid-template-columns: 1fr;
+      }
+
+      .phone-frame {
+        width: 380px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .shell {
+        padding: 16px;
+      }
+
+      .hero-card,
+      .workflow-map,
+      .surface-card {
+        border-radius: 24px;
+      }
+
+      .portal-app .app-body {
+        grid-template-columns: 1fr;
+      }
+
+      .portal-app .side-nav {
+        display: none;
+      }
+
+      .portal-app .grid-2,
+      .portal-app .grid-3,
+      .field-row,
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .phone-frame {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="hero-card">
+        <span class="eyebrow">Health Insurance Claims Intimation</span>
+        <h1>Claim Genie integrated with Claim Lens</h1>
+        <p class="hero-copy">
+          A Figma-like, clickable HTML prototype for reimbursement hospitalization claims. It covers member selection,
+          reimbursement vs. cashless routing, applicable-benefit multi-selection, claim-system matching, document upload,
+          Claim Lens AI validation, digital form quality check, hidden bank validation, consent, and reference generation.
+        </p>
+        <div class="hero-actions">
+          <button class="primary-button" onclick="jumpBoth('member')">Start prototype</button>
+          <button class="ghost-button" onclick="jumpBoth('benefits')">View benefit cards</button>
+          <button class="ghost-button" onclick="jumpBoth('workflow')">Skip to workflow</button>
+        </div>
+      </div>
+      <aside class="workflow-map" aria-label="Workflow summary">
+        <h2>Designed process flow</h2>
+        <div class="flow-row">
+          <div class="flow-dot">1</div>
+          <div><strong>Login outcome</strong><span>Select insured member, then choose Reimbursement or Cashless.</span></div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-dot">2</div>
+          <div><strong>Claim intent</strong><span>Reimbursement shows File a new Claim and Track your existing Claim; Cashless keeps the current flow.</span></div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-dot">3</div>
+          <div><strong>Applicable benefits only</strong><span>Clickable pictorial cards for hospitalization, before hospitalization, and after hospitalization with multi-select support.</span></div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-dot">4</div>
+          <div><strong>Claim Lens validation</strong><span>Documents are checked for mandatory availability, extraction, surgical-report requirement, and fallback manual form entry.</span></div>
+        </div>
+        <div class="flow-row">
+          <div class="flow-dot">5</div>
+          <div><strong>Digital QC and submit</strong><span>Auto-filled form, edit controls, masked contacts, background penny-drop validation, consent, and generated claim reference.</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="surfaces">
+      <article class="surface-card">
+        <div class="surface-head">
+          <div>
+            <h2>Mobile app design</h2>
+            <span class="surface-tag">Separate mobile journey</span>
+          </div>
+          <button class="text-button" onclick="resetApp('mobile')">Reset</button>
+        </div>
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div id="mobile" class="mobile-app app"></div>
+          </div>
+        </div>
+      </article>
+
+      <article class="surface-card">
+        <div class="surface-head">
+          <div>
+            <h2>Customer portal website design</h2>
+            <span class="surface-tag">Separate portal journey</span>
+          </div>
+          <button class="text-button" onclick="resetApp('portal')">Reset</button>
+        </div>
+        <div class="portal-frame">
+          <div class="portal-browser">
+            <span class="browser-dot"></span>
+            <span class="browser-dot"></span>
+            <span class="browser-dot"></span>
+            <span class="browser-url">https://customer.healthinsure.example/claim-genie</span>
+          </div>
+          <div id="portal" class="portal-app app"></div>
+        </div>
+      </article>
+    </section>
+  </div>
+
+  <div id="modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-live="polite">
+    <div class="modal">
+      <h4 id="modal-title"></h4>
+      <p id="modal-copy"></p>
+      <div id="modal-actions" class="modal-actions"></div>
+    </div>
+  </div>
+
+  <script>
+    const benefitLibrary = [
+      {
+        id: "during",
+        icon: "🛏️",
+        title: "During hospitalization",
+        short: "Hospital bed stay, discharge summary, final bills",
+        documents: ["Discharge Summary", "Final Hospital Bills", "Payment Receipts", "Investigation Reports"]
+      },
+      {
+        id: "before",
+        icon: "🏠➡️🏥",
+        title: "Before hospitalization",
+        short: "Pre-hospitalization diagnostics and consultations",
+        documents: ["Doctor Prescription", "Pre-hospitalization Bills", "Diagnostic Reports"]
+      },
+      {
+        id: "after",
+        icon: "🏥➡️😊",
+        title: "After hospitalization",
+        short: "Post-discharge medicine, follow-up, recovery care",
+        documents: ["Discharge Summary Reference", "Post-hospitalization Bills", "Follow-up Prescription"]
+      },
+      {
+        id: "opd",
+        icon: "🩺",
+        title: "OPD",
+        short: "Available in policy but outside this hospitalization change",
+        documents: ["OPD Prescription", "OPD Bills"]
+      },
+      {
+        id: "daily",
+        icon: "💵",
+        title: "Daily cash",
+        short: "Fixed benefit available under policy",
+        documents: ["Admission Proof", "Discharge Proof"]
+      },
+      {
+        id: "travel",
+        icon: "✈️",
+        title: "Travel",
+        short: "Travel assistance benefit available in policy",
+        documents: ["Travel Tickets", "Medical Certificate"]
+      }
+    ];
+
+    const members = [
+      { id: "aarav", name: "Aarav Sharma", relation: "Self", policy: "HIC-2048-9921", initials: "AS" },
+      { id: "nisha", name: "Nisha Sharma", relation: "Spouse", policy: "HIC-2048-9921", initials: "NS" },
+      { id: "isha", name: "Isha Sharma", relation: "Daughter", policy: "HIC-2048-9921", initials: "IS" }
+    ];
+
+    const seededClaims = [
+      { claim: "CLM-24-10873", benefit: "Hospitalization", doa: "2026-06-10", status: "Under review", member: "Aarav Sharma" },
+      { claim: "CLM-24-10612", benefit: "Hospitalization", doa: "2026-06-14", status: "Documents pending", member: "Nisha Sharma" }
+    ];
+
+    const apps = {
+      mobile: createInitialState("mobile"),
+      portal: createInitialState("portal")
+    };
+
+    function createInitialState(surface) {
+      return {
+        surface,
+        screen: "member",
+        member: members[0],
+        claimType: "",
+        intent: "",
+        benefits: ["during"],
+        doa: "2026-06-10",
+        dod: "2026-06-14",
+        amount: "85000",
+        uploads: [],
+        preIntimation: false,
+        aiFailed: false,
+        missingHandled: false,
+        surgicalHandled: false,
+        existingBank: true,
+        bankName: "Aarav Sharma",
+        bankValid: true,
+        alternateContact: false,
+        reference: "",
+        existingMatch: null
+      };
+    }
+
+    function renderApp(surface) {
+      const state = apps[surface];
+      const root = document.getElementById(surface);
+      root.innerHTML = `${renderTop(surface)}<div class="app-body">${renderSideNav(surface)}<main>${renderProgress(state)}${renderScreen(surface)}</main></div>`;
+    }
+
+    function renderTop(surface) {
+      const state = apps[surface];
+      return `
+        <header class="app-top">
+          <div>
+            <div class="app-brand">
+              <div class="genie-mark">CG</div>
+              <div>
+                <strong>Claim Genie</strong>
+                <span>Integrated with Claim Lens</span>
+              </div>
+            </div>
+            ${surface === "mobile" ? renderMemberStrip(state) : ""}
+          </div>
+          ${surface === "portal" ? renderMemberStrip(state) : ""}
+        </header>
+      `;
+    }
+
+    function renderMemberStrip(state) {
+      return `
+        <div class="member-strip">
+          <div class="avatar">${state.member.initials}</div>
+          <div>
+            <strong>${state.member.name}</strong>
+            <small>${state.member.relation} · Policy ${state.member.policy}</small>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSideNav(surface) {
+      return `
+        <aside class="side-nav">
+          <div class="nav-item active">🧞 Claim Genie</div>
+          <div class="nav-item">📄 Policies</div>
+          <div class="nav-item">🏥 Network hospitals</div>
+          <div class="nav-item">💬 Support</div>
+          <div class="nav-item">🔔 Alerts</div>
+        </aside>
+      `;
+    }
+
+    function renderProgress(state) {
+      const order = ["member", "intent", "benefits", "workflow", "form", "success"];
+      const index = Math.max(0, order.indexOf(state.screen));
+      const labels = ["Member", "Claim type", "Benefits", "Documents", "QC form"];
+      return `
+        <div class="progress-card">
+          <div class="steps">${labels.map((_, i) => `<div class="step ${i <= index ? "done" : ""}"></div>`).join("")}</div>
+          <div class="progress-label"><span>${labels[Math.min(index, labels.length - 1)]}</span><span>${Math.min(index + 1, 5)} of 5</span></div>
+        </div>
+      `;
+    }
+
+    function renderScreen(surface) {
+      const state = apps[surface];
+      if (state.screen === "member") return renderMemberScreen(surface, state);
+      if (state.screen === "intent") return renderIntentScreen(surface, state);
+      if (state.screen === "benefits") return renderBenefitsScreen(surface, state);
+      if (state.screen === "workflow") return renderWorkflowScreen(surface, state);
+      if (state.screen === "processing") return renderProcessingScreen(surface, state);
+      if (state.screen === "form") return renderFormScreen(surface, state);
+      if (state.screen === "success") return renderSuccessScreen(surface, state);
+      return renderMemberScreen(surface, state);
+    }
+
+    function renderMemberScreen(surface, state) {
+      return `
+        <section class="stage panel">
+          <h3>Who is the claim for?</h3>
+          <p>Select the insured member after login. Claim Genie will show only benefits applicable under this policy.</p>
+          <div class="grid-3">
+            ${members.map(member => `
+              <button class="choice-card ${state.member.id === member.id ? "active" : ""}" onclick="selectMember('${surface}', '${member.id}')">
+                <div class="icon">${member.initials}</div>
+                <strong>${member.name}</strong>
+                <span>${member.relation} · ${member.policy}</span>
+              </button>
+            `).join("")}
+          </div>
+          <div class="actions">
+            <button class="primary-button" onclick="go('${surface}', 'intent')">Continue to claim type</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderIntentScreen(surface, state) {
+      return `
+        <section class="stage panel">
+          <h3>Select claim type</h3>
+          <p>Choose whether this claim is reimbursement or cashless. This prototype changes the reimbursement hospitalization journey only.</p>
+          <div class="grid-2">
+            <button class="choice-card ${state.claimType === "reimbursement" ? "active" : ""}" onclick="setClaimType('${surface}', 'reimbursement')">
+              <div class="icon">💳</div>
+              <strong>Reimbursement</strong>
+              <span>File a new claim or track an existing reimbursement claim.</span>
+            </button>
+            <button class="choice-card ${state.claimType === "cashless" ? "active" : ""}" onclick="setClaimType('${surface}', 'cashless')">
+              <div class="icon">🏥</div>
+              <strong>Cashless</strong>
+              <span>Existing cashless workflow continues without changes.</span>
+            </button>
+          </div>
+          ${state.claimType === "cashless" ? `
+            <div class="notice"><strong>Cashless selected:</strong> The existing workflow will continue. Claim Genie changes are scoped to reimbursement hospitalization claims.</div>
+          ` : ""}
+          ${state.claimType === "reimbursement" ? `
+            <div class="grid-2">
+              <button class="choice-card ${state.intent === "new" ? "active" : ""}" onclick="setIntent('${surface}', 'new')">
+                <div class="icon">✨</div>
+                <strong>File a new Claim</strong>
+                <span>Start benefit selection and document-assisted intimation.</span>
+              </button>
+              <button class="choice-card ${state.intent === "track" ? "active" : ""}" onclick="setIntent('${surface}', 'track')">
+                <div class="icon">🔎</div>
+                <strong>Track your existing Claim</strong>
+                <span>View status, document gaps, and next actions.</span>
+              </button>
+            </div>
+          ` : ""}
+          ${state.intent === "track" ? renderTrackList() : ""}
+          <div class="actions">
+            <button class="ghost-button" onclick="go('${surface}', 'member')">Back</button>
+            <button class="primary-button" ${state.claimType === "reimbursement" && state.intent === "new" ? "" : "disabled"} onclick="go('${surface}', 'benefits')">Continue</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderTrackList() {
+      return `
+        <div class="track-list">
+          ${seededClaims.map(item => `
+            <div class="track-card">
+              <div>
+                <strong>${item.claim}</strong>
+                <div class="muted">${item.benefit} · DOA ${formatDate(item.doa)} · ${item.member}</div>
+              </div>
+              <span class="status">${item.status}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function renderBenefitsScreen(surface, state) {
+      return `
+        <section class="stage panel">
+          <h3>File a new reimbursement claim</h3>
+          <p>Select one or more applicable benefits. The hospitalization pictorial cards are clickable and multi-select.</p>
+          <div class="notice">You are viewing only the applicable benefits available in this policy.</div>
+          <div class="grid-3">
+            ${benefitLibrary.map(benefit => `
+              <button class="benefit-card ${state.benefits.includes(benefit.id) ? "active" : ""}" onclick="toggleBenefit('${surface}', '${benefit.id}')">
+                <span class="check">✓</span>
+                <div class="icon">${benefit.icon}</div>
+                <strong>${benefit.title}</strong>
+                <span>${benefit.short}</span>
+              </button>
+            `).join("")}
+          </div>
+          <div class="case-note">${caseCopy(state.benefits)}</div>
+          <div class="actions">
+            <button class="ghost-button" onclick="go('${surface}', 'intent')">Back</button>
+            <button class="primary-button" ${selectedJourneyBenefits(state).length ? "" : "disabled"} onclick="go('${surface}', 'workflow')">Continue to claim details</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderWorkflowScreen(surface, state) {
+      const docs = requiredDocuments(state);
+      const match = findExistingClaim(state);
+      state.existingMatch = match;
+      return `
+        <section class="stage panel">
+          <h3>Claim details and documents</h3>
+          <p>Enter admission details. Claim Genie searches existing claims in parallel while you continue.</p>
+          <div class="field-row">
+            <div>
+              <label>Date of Admission</label>
+              <input type="date" value="${state.doa}" onchange="updateField('${surface}', 'doa', this.value)">
+            </div>
+            <div>
+              <label>Requested Claim Amount</label>
+              <input type="number" min="0" value="${state.amount}" onchange="updateField('${surface}', 'amount', this.value)">
+            </div>
+          </div>
+          ${renderExistingClaimMessage(state, match)}
+          <div class="lens-card"><strong>Mandatory document checklist</strong><br>${docs.length ? "Based on selected benefits, upload: " + docs.join(", ") + "." : "Select hospitalization benefits to show mandatory documents."}</div>
+          <div class="doc-grid">${docs.map(doc => `<div class="doc-chip required">${doc}</div>`).join("")}</div>
+          <div class="doc-drop">
+            <div>
+              <strong>Upload multiple documents</strong>
+              <p class="muted">PDF, JPG, PNG images of bills, discharge summary, reports, prescriptions, and receipts.</p>
+              <input type="file" multiple onchange="handleUploads('${surface}', this.files)">
+              <div class="uploaded-list">
+                ${state.uploads.map(file => `<div class="upload-pill"><span>${file}</span><span>Ready</span></div>`).join("")}
+              </div>
+            </div>
+          </div>
+          <div class="utility-bar">
+            <button class="scenario-button" onclick="simulateMissingDocs('${surface}')">Demo: mandatory missing</button>
+            <button class="scenario-button" onclick="simulateSurgical('${surface}')">Demo: surgical report needed</button>
+            <button class="scenario-button" onclick="simulateAiFail('${surface}')">Demo: AI extraction fails</button>
+          </div>
+          <div class="actions">
+            <button class="ghost-button" onclick="go('${surface}', 'benefits')">Back</button>
+            <button class="ghost-button" onclick="proceedWithoutDocs('${surface}')">Proceed without document</button>
+            <button class="primary-button" onclick="uploadAndProceed('${surface}')">Upload &amp; Proceed</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderExistingClaimMessage(state, match) {
+      if (!match) {
+        return `<div class="inline-success" style="margin-top:14px;"><strong>Parallel claim search:</strong> No matching main claim found for the selected date and benefit combination.</div>`;
+      }
+      const selected = selectedJourneyBenefits(state);
+      const isPrePostOnly = selected.includes("before") && selected.includes("after") && !selected.includes("during");
+      if (isPrePostOnly) {
+        return `
+          <div class="alert">
+            <strong>Existing hospitalization claim found in +/- 5 day frame:</strong> ${match.claim} (${match.status}) for DOA ${formatDate(match.doa)}.
+            Choose this claim number to raise before or after hospitalization expenses.
+          </div>
+        `;
+      }
+      return `
+        <div class="alert">
+          <strong>Existing main claim found:</strong> ${match.claim} (${match.status}) already exists for the same date of admission.
+          You can create a before/after hospitalization claim using this main claim number.
+        </div>
+      `;
+    }
+
+    function renderProcessingScreen(surface, state) {
+      return `
+        <section class="stage panel processing">
+          <div class="lens-orb" aria-hidden="true"></div>
+          <h3>Claim Lens is reading your documents</h3>
+          <p class="muted">We are extracting claim details, matching mandatory documents, and preparing your digital claim form.</p>
+          <div class="processing-steps">
+            <div>Checking discharge summary, bills, and receipts</div>
+            <div>Looking for surgical indicators and report requirements</div>
+            <div>Auto-filling the claim form for your quality check</div>
+          </div>
+          <div class="actions" style="justify-content:center;">
+            <button class="primary-button" onclick="finishProcessing('${surface}')">Continue after processing</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderFormScreen(surface, state) {
+      return `
+        <section class="stage panel">
+          <h3>${state.aiFailed ? "Manual digital claim form" : "Digital claim form QC"}</h3>
+          <p>${state.aiFailed ? "Claim Lens could not confidently extract all fields, so the form is open for manual completion." : "Claim Lens auto-filled the form. Review the frozen fields and edit available sections before final submission."}</p>
+          ${state.preIntimation ? `<div class="notice"><strong>Pre-intimation case:</strong> You proceeded without documents, so Claim Lens AI was not triggered. Documents can be uploaded later before processing.</div>` : ""}
+          <div class="form-grid">
+            ${formCard("Member Selection", state.member.name, "Frozen after member selection", true)}
+            ${formCard("Date of Admission", formatDate(state.doa), "Frozen when customer-entered DOA matches extracted document data", !state.aiFailed)}
+            ${formCard("Date of Discharge", formatDate(state.dod), "Frozen when customer-entered DOD matches extracted document data", !state.aiFailed)}
+            ${formCard("Requested Amount", "₹" + Number(state.amount || 0).toLocaleString("en-IN"), "Frozen when extracted payable amount is equal to or higher than requested amount", !state.aiFailed)}
+          </div>
+          ${renderBankSection(surface, state)}
+          ${renderContactSection(surface, state)}
+          <div class="consent-row">
+            <input id="${surface}-consent" type="checkbox" checked>
+            <label for="${surface}-consent" style="margin:0;font-weight:700;">I confirm the details are correct and authorize the insurer to process this reimbursement claim using the shared documents and policy information.</label>
+          </div>
+          <div class="actions">
+            <button class="ghost-button" onclick="go('${surface}', 'workflow')">Back</button>
+            <button class="primary-button" onclick="submitClaim('${surface}')">Final submit</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function formCard(label, value, note, frozen) {
+      return `
+        <div class="form-card">
+          <button class="edit" title="Edit ${label}" ${frozen ? "disabled" : ""}>✎</button>
+          <small>${label}</small>
+          <strong>${value}</strong>
+          <span class="lock-note">${frozen ? "Frozen" : "Editable"}</span>
+          <div class="muted" style="margin-top:8px;font-size:12px;">${note}</div>
+        </div>
+      `;
+    }
+
+    function renderBankSection(surface, state) {
+      if (state.existingBank) {
+        return `
+          <div class="panel" style="margin-top:16px;padding:15px;">
+            <h3 style="font-size:18px;">Bank details</h3>
+            <div class="inline-success" style="margin-top:10px;"><strong>Existing bank available:</strong> HDFC Bank · A/C XXXX4821 · IFSC HDFC0001234</div>
+            <div class="actions"><button class="ghost-button" onclick="toggleExistingBank('${surface}')">Use different bank details</button></div>
+          </div>
+        `;
+      }
+      return `
+        <div class="panel" style="margin-top:16px;padding:15px;">
+          <h3 style="font-size:18px;">Enter bank details</h3>
+          <p class="muted">Bank validation runs automatically in the background. The customer does not see the penny-drop step.</p>
+          <div class="field-row">
+            <div><label>Account holder name</label><input value="${state.bankName}" onchange="updateField('${surface}', 'bankName', this.value)"></div>
+            <div><label>Account number</label><input value="123456789021" inputmode="numeric"></div>
+            <div><label>IFSC</label><input value="HDFC0001234"></div>
+            <div><label>Bank name</label><input value="HDFC Bank"></div>
+          </div>
+          ${state.bankValid ? `<div class="inline-success" style="margin-top:12px;"><strong>Validated:</strong> Account holder name matches the policy proposer.</div>` : `<div class="alert"><strong>Bank details need correction:</strong> The entered bank details are not correct. Please re-enter details or upload a cancelled cheque.<input type="file" style="margin-top:10px;"></div>`}
+          <div class="actions">
+            <button class="ghost-button" onclick="validateBank('${surface}')">Re-validate bank</button>
+            <button class="ghost-button" onclick="forceBankMismatch('${surface}')">Demo mismatch</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderContactSection(surface, state) {
+      return `
+        <div class="panel" style="margin-top:16px;padding:15px;">
+          <h3 style="font-size:18px;">Contact details</h3>
+          ${state.alternateContact ? `
+            <div class="field-row">
+              <div><label>Email</label><input type="email" value="alternate@example.com"></div>
+              <div><label>Mobile number</label><input value="+91 98765 00000"></div>
+            </div>
+            <div class="actions"><button class="ghost-button" onclick="toggleAlternateContact('${surface}')">Use existing masked contact</button></div>
+          ` : `
+            <div class="inline-success" style="margin-top:10px;"><strong>Existing contact available:</strong> aa***@example.com · +91 98****4321</div>
+            <div class="actions"><button class="ghost-button" onclick="toggleAlternateContact('${surface}')">Use different contact details</button></div>
+          `}
+        </div>
+      `;
+    }
+
+    function renderSuccessScreen(surface, state) {
+      return `
+        <section class="stage success-card">
+          <div class="success-icon">✓</div>
+          <h3>Claim reference generated</h3>
+          <p class="muted">Your reimbursement claim intimation has been submitted successfully.</p>
+          <div class="ref-box">${state.reference}</div>
+          <div class="case-note">
+            ${state.preIntimation ? "This is a pre-intimation case because documents were not uploaded. Claim processing will begin after mandatory documents are submitted." : "Claim Lens has prepared the case with uploaded documents and the digital claim form for processing."}
+          </div>
+          <div class="actions" style="justify-content:center;">
+            <button class="ghost-button" onclick="resetApp('${surface}')">File another claim</button>
+            <button class="primary-button" onclick="go('${surface}', 'intent')">Track claim</button>
+          </div>
+        </section>
+      `;
+    }
+
+    function selectMember(surface, memberId) {
+      apps[surface].member = members.find(member => member.id === memberId);
+      renderApp(surface);
+    }
+
+    function setClaimType(surface, type) {
+      const state = apps[surface];
+      state.claimType = type;
+      state.intent = type === "reimbursement" ? "new" : "";
+      renderApp(surface);
+    }
+
+    function setIntent(surface, intent) {
+      apps[surface].intent = intent;
+      renderApp(surface);
+    }
+
+    function toggleBenefit(surface, benefitId) {
+      const state = apps[surface];
+      const current = new Set(state.benefits);
+      current.has(benefitId) ? current.delete(benefitId) : current.add(benefitId);
+      state.benefits = Array.from(current);
+      renderApp(surface);
+    }
+
+    function updateField(surface, field, value) {
+      apps[surface][field] = value;
+      if (field === "doa") {
+        renderApp(surface);
+      }
+    }
+
+    function handleUploads(surface, files) {
+      apps[surface].uploads = Array.from(files).map(file => file.name);
+      renderApp(surface);
+    }
+
+    function proceedWithoutDocs(surface) {
+      apps[surface].preIntimation = true;
+      apps[surface].aiFailed = true;
+      apps[surface].screen = "form";
+      renderApp(surface);
+    }
+
+    function uploadAndProceed(surface) {
+      const state = apps[surface];
+      state.preIntimation = false;
+      if (!state.uploads.length) {
+        showMandatoryModal(surface, "Mandatory documents may be missing", "Please upload mandatory documents now, upload them later, or confirm they were already uploaded.");
+        return;
+      }
+      state.screen = "processing";
+      renderApp(surface);
+    }
+
+    function finishProcessing(surface) {
+      const state = apps[surface];
+      if (!state.missingHandled && state.uploads.length < 2) {
+        showMandatoryModal(surface, "Some mandatory documents are missing", "To process the claim, please add the missing mandatory documents or choose how you want to proceed.");
+        return;
+      }
+      if (!state.surgicalHandled && selectedJourneyBenefits(state).includes("during")) {
+        showSurgicalModal(surface);
+        return;
+      }
+      state.screen = "form";
+      renderApp(surface);
+    }
+
+    function simulateMissingDocs(surface) {
+      showMandatoryModal(surface, "Some mandatory documents are missing", "To process the claim, please add the missing mandatory documents or choose how you want to proceed.");
+    }
+
+    function simulateSurgical(surface) {
+      showSurgicalModal(surface);
+    }
+
+    function simulateAiFail(surface) {
+      const state = apps[surface];
+      state.aiFailed = true;
+      state.screen = "form";
+      renderApp(surface);
+    }
+
+    function showMandatoryModal(surface, title, copy) {
+      openModal(title, copy, [
+        { label: "Upload now", kind: "primary", action: () => closeModal() },
+        { label: "Upload later", kind: "ghost", action: () => {
+          closeModal();
+          openModal("Claim will wait for documents", "Since mandatory documents are missing, the claim will not be processed until they are submitted.", [
+            { label: "I understand", kind: "primary", action: () => { apps[surface].missingHandled = true; closeModal(); renderApp(surface); } }
+          ]);
+        }},
+        { label: "Already Uploaded", kind: "ghost", action: () => { apps[surface].missingHandled = true; closeModal(); apps[surface].screen = "processing"; renderApp(surface); } }
+      ]);
+    }
+
+    function showSurgicalModal(surface) {
+      openModal("Additional surgical report required", "Based on the discharge summary, a surgical report is required to process this claim.", [
+        { label: "Upload now", kind: "primary", action: () => closeModal() },
+        { label: "Upload later", kind: "ghost", action: () => {
+          closeModal();
+          openModal("Claim will wait for report", "Since a mandatory surgical report is missing, the claim will not be processed until it is submitted.", [
+            { label: "I understand", kind: "primary", action: () => { apps[surface].surgicalHandled = true; closeModal(); renderApp(surface); } }
+          ]);
+        }},
+        { label: "Already Uploaded", kind: "ghost", action: () => { apps[surface].surgicalHandled = true; closeModal(); apps[surface].screen = "form"; renderApp(surface); } }
+      ]);
+    }
+
+    function openModal(title, copy, actions) {
+      document.getElementById("modal-title").textContent = title;
+      document.getElementById("modal-copy").textContent = copy;
+      document.getElementById("modal-actions").innerHTML = actions.map((item, index) => `
+        <button class="${item.kind === "primary" ? "primary-button" : "ghost-button"}" onclick="modalActions[${index}]()">${item.label}</button>
+      `).join("");
+      window.modalActions = actions.map(item => item.action);
+      document.getElementById("modal").classList.add("show");
+    }
+
+    function closeModal() {
+      document.getElementById("modal").classList.remove("show");
+    }
+
+    function toggleExistingBank(surface) {
+      apps[surface].existingBank = !apps[surface].existingBank;
+      renderApp(surface);
+    }
+
+    function validateBank(surface) {
+      const state = apps[surface];
+      state.bankValid = normalize(state.bankName) === normalize("Aarav Sharma");
+      renderApp(surface);
+    }
+
+    function forceBankMismatch(surface) {
+      const state = apps[surface];
+      state.bankName = "Rohan Mehta";
+      state.bankValid = false;
+      renderApp(surface);
+    }
+
+    function toggleAlternateContact(surface) {
+      apps[surface].alternateContact = !apps[surface].alternateContact;
+      renderApp(surface);
+    }
+
+    function submitClaim(surface) {
+      const state = apps[surface];
+      const consent = document.getElementById(`${surface}-consent`);
+      if (consent && !consent.checked) {
+        openModal("Consent required", "Please tick consent before final submission.", [
+          { label: "Okay", kind: "primary", action: closeModal }
+        ]);
+        return;
+      }
+      state.reference = `CGR-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 899999)}`;
+      state.screen = "success";
+      renderApp(surface);
+    }
+
+    function go(surface, screen) {
+      apps[surface].screen = screen;
+      renderApp(surface);
+    }
+
+    function jumpBoth(screen) {
+      apps.mobile.screen = screen;
+      apps.portal.screen = screen;
+      if (screen !== "member") {
+        apps.mobile.claimType = "reimbursement";
+        apps.portal.claimType = "reimbursement";
+        apps.mobile.intent = "new";
+        apps.portal.intent = "new";
+      }
+      renderApp("mobile");
+      renderApp("portal");
+    }
+
+    function resetApp(surface) {
+      apps[surface] = createInitialState(surface);
+      renderApp(surface);
+    }
+
+    function selectedJourneyBenefits(state) {
+      return state.benefits.filter(id => ["during", "before", "after"].includes(id));
+    }
+
+    function requiredDocuments(state) {
+      const docs = new Set();
+      state.benefits.forEach(id => {
+        const benefit = benefitLibrary.find(item => item.id === id);
+        if (!benefit) return;
+        benefit.documents.forEach(doc => docs.add(doc));
+      });
+      return Array.from(docs);
+    }
+
+    function findExistingClaim(state) {
+      const selected = selectedJourneyBenefits(state);
+      if (!selected.length || !state.doa) return null;
+      const doaTime = new Date(state.doa).getTime();
+      const prePostOnly = selected.includes("before") && selected.includes("after") && !selected.includes("during");
+      return seededClaims.find(item => {
+        const itemTime = new Date(item.doa).getTime();
+        const diffDays = Math.abs(itemTime - doaTime) / (1000 * 60 * 60 * 24);
+        return prePostOnly ? diffDays <= 5 : item.doa === state.doa;
+      }) || null;
+    }
+
+    function caseCopy(benefits) {
+      const journey = benefits.filter(id => ["during", "before", "after"].includes(id)).sort().join("+");
+      const cases = {
+        during: "Case 1: During hospitalization only. Same-benefit same-DOA search will navigate users to pre/post filing if a main claim already exists.",
+        "before+during": "Case 2: During and before hospitalization. The main claim and pre-hospitalization expenses can be intimated together.",
+        "after+before+during": "Case 3: During, before, and after hospitalization. The journey collects one DOA and supports complete episode expenses.",
+        "after+before": "Case 4: Before and after hospitalization only. Existing main claims are searched within a +/- 5 day admission-date frame."
+      };
+      return cases[journey] || "Select hospitalization pictorial benefits to preview the matching case logic. OPD, Daily Cash, and Travel remain visible as applicable policy benefits.";
+    }
+
+    function formatDate(dateValue) {
+      if (!dateValue) return "Not provided";
+      return new Intl.DateTimeFormat("en-IN", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(dateValue));
+    }
+
+    function normalize(value) {
+      return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+    }
+
+    renderApp("mobile");
+    renderApp("portal");
+  </script>
+</body>
+</html>
